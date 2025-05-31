@@ -1,13 +1,20 @@
 ﻿@model IEnumerable<WebsiteBanHang.Models.Product>
-<h2>Products</h2>
-<table class="table">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<h2>Danh Sách Sản Phẩm</h2>
+	<a asp-action="Add" class="btn btn-success">
+		<i class="bi bi-plus-circle"></i> Thêm Sản Phẩm Mới
+	</a>
+</div>
+
+<table class="table table-striped table-hover">
 	<thead>
 		<tr>
-			<th>Name</th>
-			<th>Price</th>
-			<th>Description</th>
-			<th>Category</th>
-			<th>Actions</th>
+			<th>Tên Sản Phẩm</th>
+			<th>Giá</th>
+			<th>Mô Tả</th>
+			<th>Danh Mục</th>
+			<th>Thao Tác</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -17,13 +24,30 @@
 				<td>@product.Name</td>
 				<td>@product.Price</td>
 				<td>@product.Description</td>
-				<td>@product.Category?.Name ?? "No Category"</td>
+				<td>@(product.Category?.Name ?? "Chưa có danh mục")</td>
 				<td>
-					<a asp-action="Display" asp-routeid="@product.Id">View</a> |
-					<a asp-action="Update" asp-routeid="@product.Id">Edit</a> |
-					<a asp-action="Delete" asp-routeid="@product.Id">Delete</a>
+					<a asp-action="Display" asp-route-id="@product.Id" class="btn btn-info btn-sm">
+						<i class="bi bi-eye"></i> Xem
+					</a>
+					<a asp-action="Update" asp-route-id="@product.Id" class="btn btn-warning btn-sm">
+						<i class="bi bi-pencil"></i> Sửa
+					</a>
+					<a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-danger btn-sm">
+						<i class="bi bi-trash"></i> Xóa
+					</a>
 				</td>
 			</tr>
 		}
 	</tbody>
 </table>
+
+@if (!Model.Any())
+{
+	<div class="alert alert-info text-center">
+		<h4>Chưa có sản phẩm nào</h4>
+		<p>Hãy thêm sản phẩm đầu tiên của bạn!</p>
+		<a asp-action="Add" class="btn btn-success">
+			<i class="bi bi-plus-circle"></i> Thêm Sản Phẩm Đầu Tiên
+		</a>
+	</div>
+}

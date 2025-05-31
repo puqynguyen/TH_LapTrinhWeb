@@ -22,10 +22,10 @@ namespace WebsiteBanHang.Controllers
             var products = await _productRepository.GetAllAsync();
             return View(products);
         }
-        // GET: Add product form
-        public IActionResult Add()
+		// GET: Add product form
+		public async Task<IActionResult> Add()
         {
-            var categories = _categoryRepository.GetAllAsync();
+            var categories = await _categoryRepository.GetAllAsync();
             ViewBag.Categories = new SelectList((System.Collections.IEnumerable)categories, "Id", "Name");
             return View();
         }
