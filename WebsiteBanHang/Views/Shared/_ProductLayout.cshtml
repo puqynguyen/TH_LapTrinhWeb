@@ -1,14 +1,288 @@
-﻿<ul class="navbar-nav">
-    <li class="nav-item d-none d-md-block">
-        <a class="nav-link" asp-controller="Product" asp-action="Index">Trang Chủ</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Product" asp-action="Index">Sản Phẩm</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Category" asp-action="Index">Danh Mục</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Liên Hệ</a>
-    </li>
-</ul>
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Website Bán Hàng</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebsiteBanHang.styles.css" asp-append-version="true" />
+    <style>
+        .sidebar {
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 56px);
+            padding-top: 20px;
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .nav-link:hover {
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+
+        .nav-link.active {
+            background-color: #0d6efd;
+            color: white !important;
+            border-radius: 5px;
+        }
+
+        @@media (min-width: 768px) {
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shop"></i> Website Bán Hàng
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Cài đặt</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar position-fixed d-none d-md-block" style="width: 250px; z-index: 1000;">
+            <div class="p-3">
+                <h6 class="text-muted text-uppercase mb-3">Quản Lý</h6>
+                <ul class="nav flex-column">
+                    <!-- Trang chủ -->
+                    <li class="nav-item mb-1">
+                        <a class="nav-link text-dark" asp-controller="Product" asp-action="Index">
+                            <i class="bi bi-house me-2"></i>
+                            Trang Chủ
+                        </a>
+                    </li>
+
+                    <!-- Quản lý sản phẩm -->
+                    <li class="nav-item mb-1">
+                        <a class="nav-link text-dark" data-bs-toggle="collapse" href="#productSubmenu" role="button">
+                            <i class="bi bi-box-seam me-2"></i>
+                            Quản Lý Sản Phẩm
+                            <i class="bi bi-chevron-down float-end"></i>
+                        </a>
+                        <div class="collapse" id="productSubmenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark py-1" asp-controller="Product" asp-action="Index">
+                                        <i class="bi bi-list me-2"></i>
+                                        Danh Sách Sản Phẩm
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark py-1" asp-controller="Product" asp-action="Add">
+                                        <i class="bi bi-plus-circle me-2"></i>
+                                        Thêm Sản Phẩm
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- Quản lý danh mục -->
+                    <li class="nav-item mb-1">
+                        <a class="nav-link text-dark" data-bs-toggle="collapse" href="#categorySubmenu" role="button">
+                            <i class="bi bi-tags me-2"></i>
+                            Quản Lý Danh Mục
+                            <i class="bi bi-chevron-down float-end"></i>
+                        </a>
+                        <div class="collapse" id="categorySubmenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark py-1" asp-controller="Category" asp-action="Index">
+                                        <i class="bi bi-list me-2"></i>
+                                        Danh Sách Danh Mục
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark py-1" asp-controller="Category" asp-action="Create">
+                                        <i class="bi bi-plus-circle me-2"></i>
+                                        Thêm Danh Mục
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+
+                <hr class="my-3">
+
+                <!-- Quick Actions -->
+                <h6 class="text-muted text-uppercase mb-3">Thao Tác Nhanh</h6>
+                <div class="d-grid gap-2">
+                    <a asp-controller="Product" asp-action="Add" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-circle"></i> Thêm Sản Phẩm
+                    </a>
+                    <a asp-controller="Category" asp-action="Create" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-circle"></i> Thêm Danh Mục
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="d-md-none position-fixed" style="top: 70px; left: 10px; z-index: 1050;">
+            <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Offcanvas Menu -->
+        <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileMenu">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title">Menu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark" asp-controller="Product" asp-action="Index">
+                            <i class="bi bi-house me-2"></i> Trang Chủ
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark" asp-controller="Product" asp-action="Index">
+                            <i class="bi bi-box-seam me-2"></i> Sản Phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark" asp-controller="Category" asp-action="Index">
+                            <i class="bi bi-tags me-2"></i> Danh Mục
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark" asp-controller="Product" asp-action="Add">
+                            <i class="bi bi-plus-circle me-2"></i> Thêm Sản Phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark" asp-controller="Category" asp-action="Create">
+                            <i class="bi bi-plus-circle me-2"></i> Thêm Danh Mục
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-grow-1">
+            <div class="container-fluid p-4">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house"></i> Trang Chủ
+                            </a>
+                        </li>
+                        @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home")
+                        {
+                            <li class="breadcrumb-item">
+                                @if (ViewContext.RouteData.Values["controller"]?.ToString() == "Product")
+                                {
+                                    <a asp-controller="Product" asp-action="Index">Sản Phẩm</a>
+                                }
+                                else if (ViewContext.RouteData.Values["controller"]?.ToString() == "Category")
+                                {
+                                    <a asp-controller="Category" asp-action="Index">Danh Mục</a>
+                                }
+                            </li>
+                            @if (ViewContext.RouteData.Values["action"]?.ToString() != "Index")
+                            {
+                                <li class="breadcrumb-item active">
+                                    @switch (ViewContext.RouteData.Values["action"]?.ToString())
+                                    {
+                                        case "Add":
+                                        case "Create":
+                                            <span>Thêm Mới</span>
+                                            break;
+                                        case "Update":
+                                        case "Edit":
+                                            <span>Chỉnh Sửa</span>
+                                            break;
+                                        case "Delete":
+                                            <span>Xóa</span>
+                                            break;
+                                        case "Display":
+                                        case "Details":
+                                            <span>Chi Tiết</span>
+                                            break;
+                                        default:
+                                            <span>@ViewContext.RouteData.Values["action"]</span>
+                                            break;
+                                    }
+                                </li>
+                            }
+                        }
+                    </ol>
+                </nav>
+
+                <!-- Main Content Area -->
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center text-muted py-3 mt-5">
+        <div class="container">
+            <p>&copy; 2025 - Website Bán Hàng. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Tự động mở submenu dựa trên controller hiện tại
+        $(document).ready(function () {
+            var controller = '@ViewContext.RouteData.Values["controller"]';
+
+            if (controller === 'Product') {
+                $('#productSubmenu').addClass('show');
+                $('a[href="#productSubmenu"]').removeClass('collapsed');
+            } else if (controller === 'Category') {
+                $('#categorySubmenu').addClass('show');
+                $('a[href="#categorySubmenu"]').removeClass('collapsed');
+            }
+
+            // Highlight active menu item
+            var currentPath = window.location.pathname.toLowerCase();
+            $('.nav-link').each(function () {
+                var linkPath = $(this).attr('href');
+                if (linkPath && currentPath.includes(linkPath.toLowerCase())) {
+                    $(this).addClass('active');
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
