@@ -1,0 +1,58 @@
+﻿@model WebsiteBanHang.Models.Category
+
+@{
+    ViewData["Title"] = "Xóa Danh Mục";
+    Layout = "~/Views/Shared/_ProductLayout.cshtml";
+    bool hasProducts = ViewBag.HasProducts ?? false;
+}
+
+<div class="container mt-4">
+    <h2>Xóa Danh Mục</h2>
+
+    @if (hasProducts)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Không thể xóa!</strong> Danh mục này đang chứa sản phẩm. Vui lòng xóa hoặc chuyển các sản phẩm sang danh mục khác trước khi xóa danh mục này.
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <h4 class="alert-heading">Xác nhận xóa?</h4>
+            <p>Bạn có chắc chắn muốn xóa danh mục <strong>@Model.Name</strong>?</p>
+            <hr>
+            <p class="mb-0">Hành động này không thể hoàn tác.</p>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Thông tin danh mục</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-2">Tên Danh Mục:</dt>
+                <dd class="col-sm-10">@Model.Name</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger" @(hasProducts ? "disabled" : "")>
+                        <i class="bi bi-trash"></i> Xác Nhận Xóa
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Quay Lại
+                    </a>
+                </div>
+                @if (ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Count > 0)
+                {
+                    <div class="text-danger mt-2">
+                        @ViewData.ModelState[""].Errors.First().ErrorMessage
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+</div>

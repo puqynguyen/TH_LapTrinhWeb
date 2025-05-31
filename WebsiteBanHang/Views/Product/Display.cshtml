@@ -1,92 +1,78 @@
 ﻿@model WebsiteBanHang.Models.Product
 @{
     ViewData["Title"] = Model.Name;
-    var additionalImages = ViewBag.AdditionalImages as IEnumerable<WebsiteBanHang.Models.ProductImage>;
 }
 
-<div class="container py-4">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">@Model.Name</h2>
-            <div>
-                <a asp-action="Index" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Quay Lại
-                </a>
-                <a asp-action="Update" asp-route-id="@Model.Id" class="btn btn-primary">
-                    <i class="bi bi-pencil"></i> Chỉnh Sửa
-                </a>
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="product-images">
+                <!-- Hình ảnh chính -->
+                <div class="main-image mb-3">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 400px; width: auto;" />
+                    }
+                    else
+                    {
+                        <div class="no-image p-5 bg-light text-center rounded">
+                            <i class="bi bi-image" style="font-size: 5rem;"></i>
+                            <p class="mt-3">Không có hình ảnh</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Hình ảnh bổ sung -->
+                @if (Model.ImageUrls != null && Model.ImageUrls.Count > 0)
+                {
+                    <div class="additional-images">
+                        <h5>Hình ảnh bổ sung</h5>
+                        <div class="row">
+                            @foreach (var image in Model.ImageUrls)
+                            {
+                                <div class="col-4 col-md-3 mb-3">
+                                    <img src="@image.Url" alt="Additional Image" class="img-thumbnail" style="height: 120px; object-fit: cover;" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="product-images">
-                        <div class="main-image mb-3">
-                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                            {
-                                <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 400px; width: auto;" />
-                            }
-                            else
-                            {
-                                <div class="text-center p-5 bg-light rounded">
-                                    <i class="bi bi-image" style="font-size: 5rem;"></i>
-                                    <p class="mt-3">Không có hình ảnh</p>
-                                </div>
-                            }
-                        </div>
+        <div class="col-md-6">
+            <h1 class="mb-3">@Model.Name</h1>
+            <h3 class="text-danger mb-4">@Model.Price.ToString("C0")</h3>
 
-                        @if (additionalImages != null && additionalImages.Any())
-                        {
-                            <div class="additional-images">
-                                <h5 class="mb-3">Hình Ảnh Bổ Sung</h5>
-                                <div class="d-flex flex-wrap gap-2">
-                                    @foreach (var image in additionalImages)
-                                    {
-                                        <div class="thumbnail">
-                                            <img src="@image.Url" alt="Additional Image" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;" />
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
+            @if (Model.Category != null)
+            {
+                <p class="mb-3">
+                    <span class="badge bg-primary">@Model.Category.Name</span>
+                </p>
+            }
 
-                <div class="col-md-6">
-                    <div class="product-details">
-                        <div class="mb-4">
-                            <h3 class="text-primary mb-3">@String.Format("{0:N0} VNĐ", Model.Price)</h3>
-                            <p class="text-muted">Danh mục: @(Model.Category?.Name ?? "Không có danh mục")</p>
-                        </div>
+            <div class="description mb-4">
+                <h5>Mô tả sản phẩm</h5>
+                <p>@Model.Description</p>
+            </div>
 
-                        <div class="product-description mb-4">
-                            <h5>Mô Tả Sản Phẩm</h5>
-                            <div class="p-3 bg-light rounded">
-                                @if (!string.IsNullOrEmpty(Model.Description))
-                                {
-                                    @Html.Raw(Model.Description.Replace("\n", "<br>"))
-                                }
-                                else
-                                {
-                                    <p class="text-muted">Không có mô tả</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="d-grid gap-2 d-md-block">
+                <a href="#" class="btn btn-success btn-lg me-md-2">
+                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
+                </a>
+                <a href="#" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-heart"></i> Yêu thích
+                </a>
             </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    <script>
-        // Hiển thị hình ảnh chính khi click vào thumbnail
-        document.querySelectorAll('.thumbnail img').forEach(img => {
-            img.addEventListener('click', function () {
-                document.querySelector('.main-image img').src = this.src;
-            });
-        });
-    </script>
-}
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+        </a>
+        <a asp-action="Update" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Chỉnh sửa
+        </a>
+    </div>
+</div>
