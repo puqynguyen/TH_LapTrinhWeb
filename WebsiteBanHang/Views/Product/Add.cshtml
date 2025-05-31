@@ -1,39 +1,198 @@
 ﻿@model WebsiteBanHang.Models.ProductViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    ViewData["Title"] = "Add Product";
+    ViewData["Title"] = "Thêm Sản Phẩm";
     Layout = "~/Views/Shared/_ProductLayout.cshtml";
 }
-<h2>Add Product</h2>
-<form asp-action="Add" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+
+<div class="container mt-4">
+    <h2>Thêm Sản Phẩm Mới</h2>
+
+    <!-- Hiển thị thông báo lỗi -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Thông tin giới hạn file -->
+    <div class="alert alert-info">
+        <h6><i class="bi bi-info-circle"></i> Lưu ý về upload hình ảnh:</h6>
+        <ul class="mb-0">
+            <li>Định dạng cho phép: JPG, JPEG, PNG, GIF, BMP</li>
+            <li>Kích thước tối đa mỗi file: 10MB</li>
+            <li>Số lượng hình ảnh bổ sung tối đa: 10 files</li>
+            <li>Tổng dung lượng tối đa: 50MB</li>
+        </ul>
     </div>
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Add" method="post" enctype="multipart/form-data" id="productForm">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Tên Sản Phẩm</label>
+                                    <input asp-for="Name" class="form-control" required />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Price" class="form-label">Giá (VNĐ)</label>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0.01" max="10000" required />
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô Tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh Mục</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select" required>
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MainImage" class="form-label">Hình Ảnh Chính</label>
+                            <input type="file" asp-for="MainImage" class="form-control" accept=".jpg,.jpeg,.png,.gif,.bmp" onchange="validateMainImage(this)" />
+                            <div class="form-text">Kích thước tối đa: 10MB. Định dạng: JPG, JPEG, PNG, GIF, BMP</div>
+                            <span asp-validation-for="MainImage" class="text-danger"></span>
+                            <div id="mainImageInfo" class="mt-2"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AdditionalImages" class="form-label">Hình Ảnh Bổ Sung</label>
+                            <input type="file" asp-for="AdditionalImages" multiple class="form-control" accept=".jpg,.jpeg,.png,.gif,.bmp" onchange="validateAdditionalImages(this)" />
+                            <div class="form-text">
+                                Tối đa 10 files, mỗi file tối đa 10MB.
+                                <strong>Giữ phím Ctrl và click để chọn nhiều file</strong>
+                            </div>
+                            <span asp-validation-for="AdditionalImages" class="text-danger"></span>
+                            <div id="additionalImagesInfo" class="mt-2"></div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-save"></i> Thêm Sản Phẩm
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay Lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="bi bi-lightbulb"></i> Tips</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check text-success"></i> Sử dụng hình ảnh chất lượng cao</li>
+                        <li><i class="bi bi-check text-success"></i> Nén ảnh trước khi upload để tăng tốc độ</li>
+                        <li><i class="bi bi-check text-success"></i> Chọn hình ảnh chính làm ảnh đại diện</li>
+                        <li><i class="bi bi-check text-success"></i> Hình ảnh bổ sung hiển thị chi tiết sản phẩm</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="CategoryId">Category</label>
-        <select asp-for="CategoryId" asp-items="ViewBag.Categories"
-                class="form-control"></select>
-    </div>
-    <div class="form-group">
-        <label asp-for="MainImage">Hình ảnh chính</label>
-        <input type="file" asp-for="MainImage" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label for="AdditionalImages">Hình ảnh bổ sung</label>
-        <input type="file" asp-for="AdditionalImages" multiple class="form-control" />
-        <small class="form-text text-muted">Bạn có thể chọn nhiều hình ảnh bổ sung (giữ phím Ctrl và click để chọn nhiều file)</small>
-    </div>
-    <button type="submit" class="btn btn-primary mt-3">Add</button>
-</form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function validateMainImage(input) {
+            const fileInfo = document.getElementById('mainImageInfo');
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const size = (file.size / 1024 / 1024).toFixed(2);
+
+                if (file.size > 10 * 1024 * 1024) {
+                    fileInfo.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> File quá lớn: ${size}MB (tối đa 10MB)</span>`;
+                    input.value = '';
+                } else {
+                    fileInfo.innerHTML = `<span class="text-success"><i class="bi bi-check-circle"></i> File hợp lệ: ${file.name} (${size}MB)</span>`;
+                }
+            } else {
+                fileInfo.innerHTML = '';
+            }
+        }
+
+        function validateAdditionalImages(input) {
+            const fileInfo = document.getElementById('additionalImagesInfo');
+            if (input.files && input.files.length > 0) {
+                let totalSize = 0;
+                let fileList = '';
+                let hasError = false;
+
+                if (input.files.length > 10) {
+                    fileInfo.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Tối đa 10 files (đã chọn ${input.files.length})</span>`;
+                    input.value = '';
+                    return;
+                }
+
+                for (let i = 0; i < input.files.length; i++) {
+                    const file = input.files[i];
+                    const size = file.size / 1024 / 1024;
+                    totalSize += size;
+
+                    if (file.size > 10 * 1024 * 1024) {
+                        hasError = true;
+                        fileList += `<div class="text-danger">• ${file.name}: ${size.toFixed(2)}MB (quá lớn)</div>`;
+                    } else {
+                        fileList += `<div class="text-success">• ${file.name}: ${size.toFixed(2)}MB</div>`;
+                    }
+                }
+
+                if (totalSize > 50) {
+                    hasError = true;
+                    fileList += `<div class="text-danger"><strong>Tổng dung lượng: ${totalSize.toFixed(2)}MB (vượt quá 50MB)</strong></div>`;
+                } else {
+                    fileList += `<div class="text-info"><strong>Tổng dung lượng: ${totalSize.toFixed(2)}MB</strong></div>`;
+                }
+
+                if (hasError) {
+                    fileInfo.innerHTML = `<div class="text-danger"><i class="bi bi-exclamation-triangle"></i> Có lỗi:</div>${fileList}`;
+                    input.value = '';
+                } else {
+                    fileInfo.innerHTML = `<div class="text-success"><i class="bi bi-check-circle"></i> ${input.files.length} files hợp lệ:</div>${fileList}`;
+                }
+            } else {
+                fileInfo.innerHTML = '';
+            }
+        }
+
+        // Loading state khi submit
+        document.getElementById('productForm').addEventListener('submit', function () {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang xử lý...';
+            submitBtn.disabled = true;
+        });
+
+        // Auto dismiss alerts
+        setTimeout(function () {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}

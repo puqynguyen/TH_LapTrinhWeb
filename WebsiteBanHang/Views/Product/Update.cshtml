@@ -1,77 +1,345 @@
 ﻿@model WebsiteBanHang.Models.ProductViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    ViewData["Title"] = "Edit Product";
+    ViewData["Title"] = "Cập Nhật Sản Phẩm";
     Layout = "~/Views/Shared/_ProductLayout.cshtml";
 }
-<h2>Edit Product</h2>
-<form asp-action="Update" method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="CategoryId">Category</label>
-        <select asp-for="CategoryId" asp-items="@ViewBag.Categories"
-                class="form-control"></select>
-    </div>
-    <div class="form-group">
-        <label asp-for="MainImage">Hình ảnh chính</label>
-        <input type="file" asp-for="MainImage" class="form-control" />
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-        {
-            <div class="mt-2">
-                <img src="@Model.ImageUrl" alt="Product Image" style="max-width: 200px;" />
-            </div>
-        }
-    </div>
 
-    <!-- Hiển thị các hình ảnh bổ sung đã có -->
-    @if (ViewBag.AdditionalImages != null && ((List<ProductImage>)ViewBag.AdditionalImages).Count > 0)
+<div class="container mt-4">
+    <h2>Cập Nhật Sản Phẩm</h2>
+
+    <!-- Hiển thị thông báo lỗi -->
+    @if (TempData["Error"] != null)
     {
-        <div class="form-group">
-            <label>Hình ảnh bổ sung hiện tại</label>
-            <div class="row">
-                @foreach (var image in (List<ProductImage>)ViewBag.AdditionalImages)
-                {
-                    <div class="col-md-3 mb-3" id="image-@image.Id">
-                        <div class="card">
-                            <img src="@image.Url" class="card-img-top" alt="Product Image" style="height: 150px; object-fit: cover;">
-                            <div class="card-body p-2 text-center">
-                                <button type="button" class="btn btn-sm btn-danger delete-image" data-id="@image.Id">
-                                    <i class="bi bi-trash"></i> Xóa
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="form-group">
-        <label for="AdditionalImages">Thêm hình ảnh bổ sung</label>
-        <input type="file" asp-for="AdditionalImages" multiple class="form-control" />
-        <small class="form-text text-muted">Bạn có thể chọn nhiều hình ảnh bổ sung (giữ phím Ctrl và click để chọn nhiều file)</small>
+    <!-- Thông tin giới hạn file -->
+    <div class="alert alert-info">
+        <h6><i class="bi bi-info-circle"></i> Lưu ý về upload hình ảnh:</h6>
+        <ul class="mb-0">
+            <li>Định dạng cho phép: JPG, JPEG, PNG, GIF, BMP</li>
+            <li>Kích thước tối đa mỗi file: 10MB</li>
+            <li>Số lượng hình ảnh bổ sung tối đa: 10 files</li>
+            <li>Tổng dung lượng tối đa: 50MB</li>
+        </ul>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Update</button>
-</form>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Update" method="post" enctype="multipart/form-data" id="productForm">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ImageUrl" />
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Tên Sản Phẩm</label>
+                                    <input asp-for="Name" class="form-control" required />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Price" class="form-label">Giá (VNĐ)</label>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0.01" max="10000" required />
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô Tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh Mục</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select" required>
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Hình ảnh chính -->
+                        <div class="mb-3">
+                            <label asp-for="MainImage" class="form-label">Hình Ảnh Chính</label>
+
+                            <!-- Hiển thị hình ảnh hiện tại -->
+                            <div class="mb-3" id="currentMainImage">
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <div class="current-image-container">
+                                        <label class="form-label text-muted">Hình ảnh hiện tại:</label>
+                                        <div class="position-relative d-inline-block">
+                                            <img src="@Model.ImageUrl" alt="Current Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                            <span class="badge bg-secondary position-absolute top-0 start-0">Hiện tại</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Upload hình ảnh mới -->
+                            <input type="file" asp-for="MainImage" class="form-control" accept=".jpg,.jpeg,.png,.gif,.bmp" onchange="previewMainImage(this)" />
+                            <div class="form-text">Để trống nếu không muốn thay đổi. Kích thước tối đa: 10MB</div>
+                            <span asp-validation-for="MainImage" class="text-danger"></span>
+                            <div id="mainImageInfo" class="mt-2"></div>
+
+                            <!-- Preview hình ảnh mới -->
+                            <div id="newMainImagePreview" class="mt-3" style="display: none;">
+                                <label class="form-label text-success">Hình ảnh mới (preview):</label>
+                                <div class="position-relative d-inline-block">
+                                    <img id="newMainImageImg" src="" alt="New Image Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                    <span class="badge bg-success position-absolute top-0 start-0">Mới</span>
+                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" onclick="removeMainImagePreview()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hình ảnh bổ sung hiện tại -->
+                        @if (ViewBag.AdditionalImages != null && ((List<ProductImage>)ViewBag.AdditionalImages).Count > 0)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Hình Ảnh Bổ Sung Hiện Tại</label>
+                                <div class="row" id="currentAdditionalImages">
+                                    @foreach (var image in (List<ProductImage>)ViewBag.AdditionalImages)
+                                    {
+                                        <div class="col-md-3 col-sm-4 col-6 mb-3" id="image-@image.Id">
+                                            <div class="card">
+                                                <div class="position-relative">
+                                                    <img src="@image.Url" class="card-img-top" alt="Product Image" style="height: 150px; object-fit: cover;">
+                                                    <span class="badge bg-secondary position-absolute top-0 start-0">Hiện tại</span>
+                                                </div>
+                                                <div class="card-body p-2 text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger delete-image" data-id="@image.Id">
+                                                        <i class="bi bi-trash"></i> Xóa
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Upload hình ảnh bổ sung mới -->
+                        <div class="mb-3">
+                            <label asp-for="AdditionalImages" class="form-label">Thêm Hình Ảnh Bổ Sung Mới</label>
+                            <input type="file" asp-for="AdditionalImages" multiple class="form-control" accept=".jpg,.jpeg,.png,.gif,.bmp" onchange="previewAdditionalImages(this)" />
+                            <div class="form-text">
+                                Tối đa 10 files, mỗi file tối đa 10MB.
+                                <strong>Giữ phím Ctrl và click để chọn nhiều file</strong>
+                            </div>
+                            <span asp-validation-for="AdditionalImages" class="text-danger"></span>
+                            <div id="additionalImagesInfo" class="mt-2"></div>
+
+                            <!-- Preview hình ảnh bổ sung mới -->
+                            <div id="newAdditionalImagesPreview" class="mt-3" style="display: none;">
+                                <label class="form-label text-success">Hình ảnh bổ sung mới (preview):</label>
+                                <div class="row" id="newAdditionalImagesContainer">
+                                    <!-- Preview images sẽ được thêm vào đây bằng JavaScript -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeAllAdditionalPreviews()">
+                                    <i class="bi bi-x-circle"></i> Xóa tất cả preview
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-save"></i> Cập Nhật Sản Phẩm
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay Lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="bi bi-lightbulb"></i> Tips</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check text-success"></i> Preview sẽ hiển thị hình ảnh mới trước khi lưu</li>
+                        <li><i class="bi bi-check text-success"></i> Có thể xóa từng hình ảnh cũ riêng lẻ</li>
+                        <li><i class="bi bi-check text-success"></i> Hình ảnh mới sẽ được thêm vào, không thay thế hết</li>
+                        <li><i class="bi bi-check text-success"></i> Để trống nếu không muốn thay đổi hình chính</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
     <script>
+        // Preview hình ảnh chính
+        function previewMainImage(input) {
+            const fileInfo = document.getElementById('mainImageInfo');
+            const previewContainer = document.getElementById('newMainImagePreview');
+            const previewImg = document.getElementById('newMainImageImg');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const size = (file.size / 1024 / 1024).toFixed(2);
+
+                if (file.size > 10 * 1024 * 1024) {
+                    fileInfo.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> File quá lớn: ${size}MB (tối đa 10MB)</span>`;
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                } else {
+                    fileInfo.innerHTML = `<span class="text-success"><i class="bi bi-check-circle"></i> File hợp lệ: ${file.name} (${size}MB)</span>`;
+
+                    // Hiển thị preview
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImg.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                fileInfo.innerHTML = '';
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        // Xóa preview hình ảnh chính
+        function removeMainImagePreview() {
+            document.getElementById('newMainImagePreview').style.display = 'none';
+            document.querySelector('input[name="MainImage"]').value = '';
+            document.getElementById('mainImageInfo').innerHTML = '';
+        }
+
+        // Preview hình ảnh bổ sung
+        function previewAdditionalImages(input) {
+            const fileInfo = document.getElementById('additionalImagesInfo');
+            const previewContainer = document.getElementById('newAdditionalImagesPreview');
+            const imagesContainer = document.getElementById('newAdditionalImagesContainer');
+
+            if (input.files && input.files.length > 0) {
+                let totalSize = 0;
+                let fileList = '';
+                let hasError = false;
+
+                if (input.files.length > 10) {
+                    fileInfo.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Tối đa 10 files (đã chọn ${input.files.length})</span>`;
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+
+                // Clear previous previews
+                imagesContainer.innerHTML = '';
+
+                for (let i = 0; i < input.files.length; i++) {
+                    const file = input.files[i];
+                    const size = file.size / 1024 / 1024;
+                    totalSize += size;
+
+                    if (file.size > 10 * 1024 * 1024) {
+                        hasError = true;
+                        fileList += `<div class="text-danger">• ${file.name}: ${size.toFixed(2)}MB (quá lớn)</div>`;
+                    } else {
+                        fileList += `<div class="text-success">• ${file.name}: ${size.toFixed(2)}MB</div>`;
+
+                        // Tạo preview cho file hợp lệ
+                        createImagePreview(file, i);
+                    }
+                }
+
+                if (totalSize > 50) {
+                    hasError = true;
+                    fileList += `<div class="text-danger"><strong>Tổng dung lượng: ${totalSize.toFixed(2)}MB (vượt quá 50MB)</strong></div>`;
+                } else {
+                    fileList += `<div class="text-info"><strong>Tổng dung lượng: ${totalSize.toFixed(2)}MB</strong></div>`;
+                }
+
+                if (hasError) {
+                    fileInfo.innerHTML = `<div class="text-danger"><i class="bi bi-exclamation-triangle"></i> Có lỗi:</div>${fileList}`;
+                    input.value = '';
+                    previewContainer.style.display = 'none';
+                } else {
+                    fileInfo.innerHTML = `<div class="text-success"><i class="bi bi-check-circle"></i> ${input.files.length} files hợp lệ:</div>${fileList}`;
+                    previewContainer.style.display = 'block';
+                }
+            } else {
+                fileInfo.innerHTML = '';
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        // Tạo preview cho từng hình ảnh
+        function createImagePreview(file, index) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-3 col-sm-4 col-6 mb-3';
+                colDiv.id = `preview-${index}`;
+
+                colDiv.innerHTML = `
+                            <div class="card">
+                                <div class="position-relative">
+                                    <img src="${e.target.result}" class="card-img-top" alt="Preview" style="height: 150px; object-fit: cover;">
+                                    <span class="badge bg-success position-absolute top-0 start-0">Mới</span>
+                                </div>
+                                <div class="card-body p-2 text-center">
+                                    <small class="text-muted d-block">${file.name}</small>
+                                    <button type="button" class="btn btn-sm btn-danger mt-1" onclick="removePreview(${index})">
+                                        <i class="bi bi-x"></i> Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                document.getElementById('newAdditionalImagesContainer').appendChild(colDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Xóa một preview cụ thể
+        function removePreview(index) {
+            const previewElement = document.getElementById(`preview-${index}`);
+            if (previewElement) {
+                previewElement.remove();
+            }
+
+            // Kiểm tra nếu không còn preview nào thì ẩn container
+            const container = document.getElementById('newAdditionalImagesContainer');
+            if (container.children.length === 0) {
+                document.getElementById('newAdditionalImagesPreview').style.display = 'none';
+                document.querySelector('input[name="AdditionalImages"]').value = '';
+                document.getElementById('additionalImagesInfo').innerHTML = '';
+            }
+        }
+
+        // Xóa tất cả preview
+        function removeAllAdditionalPreviews() {
+            document.getElementById('newAdditionalImagesPreview').style.display = 'none';
+            document.getElementById('newAdditionalImagesContainer').innerHTML = '';
+            document.querySelector('input[name="AdditionalImages"]').value = '';
+            document.getElementById('additionalImagesInfo').innerHTML = '';
+        }
+
+        // Xóa hình ảnh hiện tại
         $(document).ready(function () {
             $('.delete-image').on('click', function () {
                 var imageId = $(this).data('id');
@@ -82,7 +350,14 @@
                         data: { id: imageId },
                         success: function (result) {
                             if (result.success) {
-                                $('#image-' + imageId).remove();
+                                $('#image-' + imageId).fadeOut(300, function () {
+                                    $(this).remove();
+
+                                    // Kiểm tra nếu không còn hình ảnh nào
+                                    if ($('#currentAdditionalImages .col-md-3').length === 0) {
+                                        $('#currentAdditionalImages').parent().hide();
+                                    }
+                                });
                             } else {
                                 alert('Không thể xóa hình ảnh. Vui lòng thử lại sau.');
                             }
@@ -94,5 +369,17 @@
                 }
             });
         });
+
+        // Loading state khi submit
+        document.getElementById('productForm').addEventListener('submit', function () {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang xử lý...';
+            submitBtn.disabled = true;
+        });
+
+        // Auto dismiss alerts
+        setTimeout(function () {
+            $('.alert').fadeOut('slow');
+        }, 5000);
     </script>
 }
