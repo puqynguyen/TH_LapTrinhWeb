@@ -16,9 +16,6 @@ builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
 builder.Services.AddScoped<IProductImageRepository, EFProductImageRepository>();
 
-// Add logging
-builder.Services.AddLogging();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -38,7 +35,6 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
-// Sửa routing để Category controller hoạt động
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Product}/{action=Index}/{id?}");

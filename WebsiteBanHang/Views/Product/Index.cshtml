@@ -1,5 +1,8 @@
 ﻿@model IEnumerable<WebsiteBanHang.Models.Product>
-
+@{
+	ViewData["Title"] = "Danh Sách Sản Phẩm";
+	Layout = "~/Views/Shared/_ProductLayout.cshtml";
+}
 <div class="d-flex justify-content-between align-items-center mb-3">
 	<h2>Danh Sách Sản Phẩm</h2>
 	<a asp-action="Add" class="btn btn-success">
