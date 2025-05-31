@@ -20,27 +20,34 @@ namespace WebsiteBanHang.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<Product> GetByIdAsync(int id)
-		{
-			// Cũng thêm Include cho GetByIdAsync để có thể hiển thị category trong Display view
-			return await _context.Products
-				.Include(p => p.Category)
-				.FirstOrDefaultAsync(p => p.Id == id);
-		}
+        public async Task<Product> GetByIdAsync(int id)
+        {
+            return await _context.Products
+                .AsNoTracking() // Không theo dõi entity
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
 
-		public async Task AddAsync(Product product)
+        public async Task AddAsync(Product product)
 		{
 			_context.Products.Add(product);
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task UpdateAsync(Product product)
-		{
-			_context.Products.Update(product);
-			await _context.SaveChangesAsync();
-		}
+        public async Task UpdateAsync(Product product)
+        {
+            var existingProduct = await _context.Products.FindAsync(product.Id);
+            if (existingProduct != null)
+            {
+                _context.Entry(existingProduct).CurrentValues.SetValues(product);
+            }
+            else
+            {
+                _context.Products.Update(product);
+            }
+            await _context.SaveChangesAsync();
+        }
 
-		public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
 		{
 			var product = await GetByIdAsync(id);
 			if (product != null)

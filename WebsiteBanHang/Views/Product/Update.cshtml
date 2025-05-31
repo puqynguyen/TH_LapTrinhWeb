@@ -1,36 +1,149 @@
 ﻿@model WebsiteBanHang.Models.Product
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
-	ViewData["Title"] = "Edit Product";
+    ViewData["Title"] = "Edit Product";
+    var additionalImages = ViewBag.AdditionalImages as IEnumerable<WebsiteBanHang.Models.ProductImage>;
 }
-<h2>Edit Product</h2>
-<form asp-action="Update" method="post" enctype="multipart/form-data">
-	<input type="hidden" asp-for="Id" />
-	<div class="form-group">
-		<label asp-for="Name"></label>
-		<input asp-for="Name" class="form-control" />
-		<span asp-validation-for="Name" class="text-danger"></span>
-	</div>
-	<div class="form-group">
-		<label asp-for="Price"></label>
-		<input asp-for="Price" class="form-control" />
-		<span asp-validation-for="Price" class="text-danger"></span>
-	</div>
-	<div class="form-group">
-		<label asp-for="Description"></label>
-		<textarea asp-for="Description" class="form-control"></textarea>
-		<span asp-validation-for="Description" class="textdanger"></span>
-	</div>
-	<div class="form-group">
-		<label asp-for="CategoryId">Category</label>
-		<select asp-for="CategoryId" asp-items="@ViewBag.Categories"
-				class="form-control"></select>
-	</div>
-	<div class="form-group">
-		<label asp-for="ImageUrl">Product Image</label>
-		<input type="file" asp-for="ImageUrl" class="form-control" />
-		<img src="@Model.ImageUrl" alt="Product Image" style="max-width:
-200px;" />
-	</div>
-	<button type="submit" class="btn btn-primary">Update</button>
-</form>
+
+<div class="container py-4">
+    <h2 class="mb-4">Chỉnh Sửa Sản Phẩm</h2>
+    
+    <form asp-action="Update" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="form-label">Tên Sản Phẩm</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Price" class="form-label">Giá</label>
+                            <input asp-for="Price" class="form-control" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh Mục</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select"></select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="form-label">Mô Tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="mainImage" class="form-label">Hình Ảnh Chính</label>
+                            <input type="file" id="mainImage" name="mainImage" class="form-control" accept="image/*" onchange="previewImage(event, 'mainImagePreview')" />
+                            
+                            <div class="mt-2">
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <div class="position-relative">
+                                        <img id="mainImagePreview" src="@Model.ImageUrl" alt="Current Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <img id="mainImagePreview" src="#" alt="Preview" style="max-width: 200px; max-height: 200px; display: none;" class="img-thumbnail" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="additionalImages" class="form-label">Thêm Hình Ảnh Bổ Sung</label>
+                            <input type="file" id="additionalImages" name="additionalImages" multiple class="form-control" accept="image/*" onchange="previewMultipleImages(event, 'newImagesPreview')" />
+                            <div id="newImagesPreview" class="d-flex flex-wrap gap-2 mt-2">
+                                <!-- Hình ảnh mới sẽ được thêm vào đây qua JavaScript -->
+                            </div>
+                        </div>
+                        
+                        @if (additionalImages != null && additionalImages.Any())
+                        {
+                            <div class="mt-4">
+                                <h5>Hình Ảnh Bổ Sung Hiện Tại</h5>
+                                <div class="d-flex flex-wrap gap-2" id="existingImagesContainer">
+                                    @foreach (var image in additionalImages)
+                                    {
+                                        <div class="position-relative image-container" data-id="@image.Id">
+                                            <img src="@image.Url" alt="Additional Image" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;" />
+                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" onclick="deleteImage(@image.Id, this)">X</button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event, previewId) {
+            const file = event.target.files[0];
+            const preview = document.getElementById(previewId);
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            } else {
+                preview.src = '#';
+                preview.style.display = 'none';
+            }
+        }
+
+        function previewMultipleImages(event, previewContainerId) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById(previewContainerId);
+            previewContainer.innerHTML = '';
+
+            for (const file of files) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'img-thumbnail';
+                img.style.width = '100px';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                previewContainer.appendChild(img);
+            }
+        }
+
+        async function deleteImage(imageId, button) {
+            if (confirm('Bạn có chắc muốn xóa hình ảnh này?')) {
+                try {
+                    const response = await fetch(`/Product/DeleteImage/${imageId}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        button.parentElement.remove();
+                    } else {
+                        alert('Xóa hình ảnh thất bại.');
+                    }
+                } catch (error) {
+                    alert('Đã xảy ra lỗi khi xóa hình ảnh.');
+                }
+            }
+        }
+    </script>
+}
